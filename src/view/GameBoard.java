@@ -76,10 +76,14 @@ public class GameBoard extends JPanel {
                 this.scoreView[0] = "00";
                 this.scoreView[1] = "00";
             }
+            
             return;
         }
 
         this.mainWindow.renderGame(g);
+        
+        g2d.setFont(this.textFont);
+        g2d.drawString(POINTS_TO_WIN, this.getWidth() / 2 - 90, 50);
 
         g2d.setFont(this.scoreFont);
         g2d.drawString(this.scoreView[0], this.getWidth() / 2 - 100, this.getHeight() / 4);
