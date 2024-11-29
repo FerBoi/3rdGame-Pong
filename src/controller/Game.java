@@ -13,6 +13,7 @@ import view.MainWindow;
 import static controller.GameConst.Size.*;
 import static controller.GameConst.FPS;
 import static controller.GameConst.Movement.NO_MOVEMENT;
+import static controller.GameConst.POINT_TO_WIN;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import javax.swing.SwingUtilities;
@@ -23,29 +24,37 @@ import model.Ball;
  * @author Fernando GJ
  */
 public class Game implements Runnable {
-    private final Thread GAME_THREAD;
+    private Thread gameThread;
     private final MainWindow WINDOW;
     private boolean gameStarted;
+    private boolean gameFinished;
     
     // game components 
     private final Paddle[] PLAYERS_PADDLE = new Paddle[2];
     private Ball gameBall;
-    private final int[] SCORE = new int[2];
+    private int[] score;
     
     public Game() {
-        this.GAME_THREAD = new Thread(this);
         this.WINDOW = new MainWindow(this);
         
         this.WINDOW.setLocationRelativeTo(null);
         this.WINDOW.setVisible(true);
         
+        this.initialStatus();
+    }
+    
+    private void initialStatus() {
+        this.gameThread = new Thread(this);
+        
         // players paddle initialize
         this.PLAYERS_PADDLE[0] = new Paddle(new Point(10, 20), PADDLE_SIZE, Color.RED);
         this.PLAYERS_PADDLE[1] = new Paddle(new Point(BOARD_SIZE.width - (PADDLE_SIZE.width + 10), BOARD_SIZE.height - PADDLE_SIZE.height - 20), PADDLE_SIZE, Color.BLUE);
-        
+
         // game ball
-        this.gameBall = new Ball(new Point((BOARD_SIZE.width / 2) - (BALL_DIAMETER / 2), 
+        this.gameBall = new Ball(new Point((BOARD_SIZE.width / 2) - (BALL_DIAMETER / 2),
                 (BOARD_SIZE.height / 2) - (BALL_DIAMETER / 2)), new Dimension(BALL_DIAMETER, BALL_DIAMETER));
+        
+        this.score = new int[2];
     }
 
     public boolean isGameStarted() {
@@ -53,13 +62,24 @@ public class Game implements Runnable {
     }
 
     public void setGameStarted(boolean gameStarted) {
-        if(this.gameStarted)
-            return;
-        
         this.gameStarted = gameStarted;
-        
-        if(this.gameStarted)
-            this.GAME_THREAD.start();
+        this.gameThread.start();
+        this.gameFinished = false;
+    }
+
+    public boolean isGameFinished() {
+        return gameFinished;
+    }
+
+    public void setGameFinished(boolean gameFinished) {
+        this.gameFinished = gameFinished;
+    }
+    
+    public Object getWinner() {
+        Object o = this.score[0] == 11 ? 1 : 2;
+        this.gameStarted = false;
+
+        return o;
     }
     
     private void update() {
@@ -74,10 +94,15 @@ public class Game implements Runnable {
             if(this.gameBall.getMaxX() < -1)
                 index = 1;
             
-            this.SCORE[index]++;
-            this.WINDOW.incrementScore(this.SCORE[index], index == 0);
-            this.gameBall = new Ball(new Point((BOARD_SIZE.width / 2) - (BALL_DIAMETER / 2), 
-                (BOARD_SIZE.height / 2) - (BALL_DIAMETER / 2)), new Dimension(BALL_DIAMETER, BALL_DIAMETER));
+            this.score[index]++;
+            this.WINDOW.incrementScore(this.score[index], index == 0);
+            
+            if(this.score[0] == POINT_TO_WIN || this.score[1] == POINT_TO_WIN)
+                this.gameFinished = true;
+            else
+                this.gameBall = new Ball(new Point((BOARD_SIZE.width / 2) - (BALL_DIAMETER / 2),
+                        (BOARD_SIZE.height / 2) - (BALL_DIAMETER / 2)), new Dimension(BALL_DIAMETER, BALL_DIAMETER));
+            
         }
     }
     
@@ -114,7 +139,7 @@ public class Game implements Runnable {
         
         int currentFrames = 0;
         
-        while(true) {
+        while(!this.gameFinished) {
             long now = System.nanoTime();
             deltaTimeFPS+= (now - lastLoopIteration) / frameDuration;
             
@@ -134,12 +159,8 @@ public class Game implements Runnable {
                 currentFrames = 0;
             }
         }
+        
+        this.initialStatus(); // game reset
     }
-
-
-
-
-
-
 
 } // end Game
