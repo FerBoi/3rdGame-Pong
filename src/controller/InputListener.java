@@ -39,7 +39,10 @@ public class InputListener implements KeyListener {
                     playerOneMovement = false;
                 
                 this.GAME.playerMove(DOWN, playerOneMovement);
-            } case KeyEvent.VK_SPACE -> this.GAME.setGameStarted(true);
+            } case KeyEvent.VK_SPACE -> {
+                if(!this.GAME.isGameStarted())
+                    this.GAME.setGameStarted(true);
+            }
         }
     }
 
