@@ -15,6 +15,7 @@ public class GameConst {
     public final static int FPS = 60;
     public final static int INITIAL_BALL_SPEED = 4;
     public final static int PADDLE_SPEED = 5;
+    public final static int POINT_TO_WIN = 11;
     
     public static class Size {
 
@@ -38,6 +39,9 @@ public class GameConst {
     public static class Text {
         
         public final static String BEFORE_STARTING = "Press SPACE to start the game";
+        public final static String AFTER_MATCH = "Player %s won";
+        public final static String AFTER_MATCH_ONE = "Press SPACE to play again";
+        public final static String POINTS_TO_WIN = "Best Of " + POINT_TO_WIN;
     }
 
 } // end GameConst
